@@ -114,10 +114,10 @@ matches:
 
 ## ⚠️ Notes
 
-- Espanso should not be running as a service when using this app (uses --unmanaged mode). If you run Espanso as a service, use mainservice.py instead.
-- Uses `espanso start --unmanaged`
+- Espanso should not be running as a service when using this app (uses --unmanaged mode). If you run Espanso as a service, use [mainservice.py](./mainservice.py) instead.
+- Uses `espanso start --unmanaged` (see implementation in [main.py](./main.py))
 - Requires the espanso binary to be available in PATH
-- YAML errors in `vars` are validated
+- YAML errors in `vars` are validated (see handling in [main.py](./main.py))
 ---
 
 ## 🐞 Known Issues
