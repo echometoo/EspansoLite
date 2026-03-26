@@ -36,6 +36,7 @@ espanso-lite/
 ## ⚙️ Requirements
 
 * Python 3.8+
+* PyYAML>=6.0
 * Espanso installed
 
 Install Espanso:
@@ -50,21 +51,7 @@ Install Espanso:
 ```
 git clone https://github.com/YOUR_USERNAME/espanso-lite.git
 cd espanso-lite
-```
-
-### 2. Install dependencies
-
-```
 pip install -r requirements.txt
-```
-
----
-
-## ▶️ Usage
-
-Run the application:
-
-```
 python main.py
 ```
 
@@ -123,6 +110,7 @@ matches:
 
 ## ⚠️ Notes
 
+* Yours espanso should not run as service ( --unmanaged )
 * Uses `espanso start --unmanaged`
 * Requires espanso binary in PATH
 * YAML errors in `vars` will be validated
@@ -137,15 +125,4 @@ matches:
 ---
 
 
-## 🧾 requirements.txt
-
-```
-PyYAML
-```
-
-## 📌 main.py
-
-Place your provided Python script here unchanged.
-
----
 
