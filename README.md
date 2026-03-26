@@ -10,6 +10,9 @@ This tool allows you to:
 * View command logs
 
 ---
+<p align="center">
+  <img src="./screenshots/main-ui.png" width="800">
+</p>
 
 ## 📦 Features
 
@@ -18,18 +21,6 @@ This tool allows you to:
 * Start/Stop/Restart Espanso from UI
 * YAML validation for `vars`
 * Built-in log panel
-
----
-
-## 📁 Project Structure
-
-```
-espanso-lite/
-│── main.py
-│── requirements.txt
-│── README.md
-│── .gitignore
-```
 
 ---
 
