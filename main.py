@@ -3,6 +3,7 @@ import yaml
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import subprocess
+from datetime import datetime
 
 DEFAULT_PATH = os.path.expanduser("~/.config/espanso/match/base.yml")
 
@@ -54,15 +55,20 @@ class EspansoLite:
         ctrl = tk.Frame(self.root)
         ctrl.pack(fill="x", pady=5)
 
-        tk.Button(ctrl, text="Start", command=self.start_espanso).pack(side="left")
-        tk.Button(ctrl, text="Stop", command=self.stop_espanso).pack(side="left")
-        tk.Button(ctrl, text="Restart", command=self.restart_espanso).pack(side="left")
+        self.btn_start = tk.Button(ctrl, text="Start", command=self.start_espanso)
+        self.btn_start.pack(side="left")
+
+        self.btn_stop = tk.Button(ctrl, text="Stop", command=self.stop_espanso)
+        self.btn_stop.pack(side="left")
+
+        self.btn_restart = tk.Button(ctrl, text="Restart", command=self.restart_espanso)
+        self.btn_restart.pack(side="left")
+
         tk.Button(ctrl, text="Refresh", command=self.detect_status).pack(side="left")
 
         self.status_label = tk.Label(ctrl, textvariable=self.status_var, width=40)
         self.status_label.pack(side="right")
 
-        # Divider
         tk.Frame(self.root, height=2, bg="gray").pack(fill="x", pady=5)
 
         # ===== SEARCH =====
@@ -153,7 +159,6 @@ class EspansoLite:
         log_container.pack(fill="x")
         log_container.pack_propagate(False)
 
-        # Inner frame to hold text + scrollbar
         log_inner = tk.Frame(log_container)
         log_inner.pack(fill="both", expand=True)
 
@@ -165,11 +170,18 @@ class EspansoLite:
         self.log.pack(side="left", fill="both", expand=True)
         log_scroll.pack(side="right", fill="y")
 
+        # 🔥 LOG COLOR TAGS
+        self.log.tag_config("INFO", foreground="black")
+        self.log.tag_config("ACTION", foreground="blue")
+        self.log.tag_config("ERROR", foreground="red")
+
         tk.Button(log_frame, text="Clear Log", command=self.clear_log).pack(anchor="e")
 
     # ---------- Logging ----------
-    def log_write(self, text):
-        self.log.insert(tk.END, text + "\n")
+    def log_write(self, text, level="INFO"):
+        now = datetime.now().strftime("%H:%M:%S")
+        line = f"[{now}] [{level}] {text}\n"
+        self.log.insert(tk.END, line, level)
         self.log.see(tk.END)
 
     def clear_log(self):
@@ -179,13 +191,16 @@ class EspansoLite:
     def run_cmd(self, cmd):
         try:
             result = subprocess.run(cmd, capture_output=True, text=True)
+
             if result.stdout:
-                self.log_write(result.stdout.strip())
+                self.log_write(result.stdout.strip(), "INFO")
+
             if result.stderr:
-                self.log_write("ERR: " + result.stderr.strip())
+                self.log_write(result.stderr.strip(), "ERROR")
+
             return result.stdout.strip()
         except Exception as e:
-            self.log_write(str(e))
+            self.log_write(str(e), "ERROR")
             return ""
 
     # ---------- Espanso ----------
@@ -201,28 +216,37 @@ class EspansoLite:
         color = "green" if status == "running" else "red"
         self.status_label.config(fg=color)
 
+    def update_buttons_by_status(self, status):
+        if status == "running":
+            self.btn_start.config(state="disabled")
+            self.btn_stop.config(state="normal")
+        else:
+            self.btn_start.config(state="normal")
+            self.btn_stop.config(state="disabled")
+
     def detect_status(self):
         status = self.get_status()
         self.update_status_label(status)
+        self.update_buttons_by_status(status)
 
     def start_espanso(self):
         if self.get_status() == "running":
-            self.log_write("Espanso already running.")
+            self.log_write("Espanso already running.", "INFO")
             return
-        self.log_write("Starting espanso (unmanaged)...")
+        self.log_write("Starting espanso (unmanaged)...", "ACTION")
         self.run_cmd(["espanso", "start", "--unmanaged"])
         self.detect_status()
 
     def stop_espanso(self):
         if self.get_status() == "stopped":
-            self.log_write("Espanso already stopped.")
+            self.log_write("Espanso already stopped.", "INFO")
             return
-        self.log_write("Stopping espanso...")
+        self.log_write("Stopping espanso...", "ACTION")
         self.run_cmd(["espanso", "stop"])
         self.detect_status()
 
     def restart_espanso(self):
-        self.log_write("Restarting espanso (unmanaged)...")
+        self.log_write("Restarting espanso (unmanaged)...", "ACTION")
         self.run_cmd(["espanso", "stop"])
         self.run_cmd(["espanso", "start", "--unmanaged"])
         self.detect_status()
