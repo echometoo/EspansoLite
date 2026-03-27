@@ -1,26 +1,148 @@
-# EspansoLite
+## 🧩 Overview
 
-A lightweight GUI manager for Espanso (text expander) built with Python + Tkinter.
+**EspansoLite** is a lightweight graphical interface for managing Espanso configuration files.
 
-This tool allows you to:
+It provides a simple and efficient way to edit YAML-based text expansion rules, while also allowing direct control over the Espanso process—all from a single desktop application.
 
-* Manage Espanso YAML matches visually
-* Start / Stop / Restart Espanso
-* Search and edit triggers quickly
-* View command logs
+Built with **Python + Tkinter**, it requires no additional GUI frameworks and runs cross-platform.
+
+---
+
+## 🚀 Key Features
+
+### 🗂 YAML Match Management
+
+* Load and edit Espanso `matches` from YAML files
+* Full CRUD operations:
+
+  * Add new entries
+  * Update existing entries
+  * Delete entries
+* Inline editing for:
+
+  * `trigger`
+  * `replace`
+  * `vars` (with YAML parsing & validation)
+
+---
+
+### 🔍 Live Search & Filtering
+
+* Instant filtering while typing
+* Matches both:
+
+  * trigger text
+  * replacement text
+* Case-insensitive search
+
+---
+
+### 🖥 Process Control (Espanso)
+
+* Start Espanso (`--unmanaged` mode)
+* Stop Espanso
+* Restart Espanso safely
+* Real-time status detection:
+
+  * Running / Stopped
+* Smart button state management:
+
+  * Prevents multiple spawn instances
+  * Disables invalid actions automatically
+
+---
+
+### 📊 Structured Logging System
+
+* Timestamped logs (`HH:MM:SS`)
+* Log levels:
+
+  * `INFO`
+  * `ACTION`
+  * `ERROR`
+* Color-coded output:
+
+  * Black → Info
+  * Blue → Actions
+  * Red → Errors
+* Captures:
+
+  * Command output (stdout)
+  * Command errors (stderr)
+
+---
+
+### 📋 Table View (Improved UX)
+
+* Scrollable table with:
+
+  * Vertical scrollbar
+  * Horizontal scrollbar
+* Fixed column widths for better readability
+* Alternating row colors (striped view)
+* Handles large datasets efficiently
+
+---
+
+### 🧾 Log Panel (Fixed Layout)
+
+* Dedicated log area with:
+
+  * Fixed height (no layout collapse)
+  * Vertical scrollbar
+* Auto-scroll to latest entry
+* Clear log button
+
+---
+
+### ⌨️ Keyboard Shortcuts
+
+* `Ctrl + N` → Add entry
+* `Ctrl + S` → Save YAML
+* `Delete` → Remove selected entry
+
+---
+
+### 🛡 Data Validation
+
+* YAML parsing for `vars` field
+* Prevents invalid YAML from being saved
+* Clear error feedback via dialog
+
+---
+
+## ⚙️ Technical Highlights
+
+* Pure standard library + `PyYAML` (no heavy dependencies)
+* Deterministic subprocess handling (no race conditions)
+* State-driven UI (buttons reflect real system state)
+* Modular structure:
+
+  * UI layer
+  * Command execution layer
+  * Data handling layer
+
+---
+
+## 🎯 Design Goals
+
+* Simplicity over complexity
+* No external GUI frameworks
+* Safe interaction with Espanso
+* Fast editing workflow for power users
+
+---
+
+## ⚠️ Notes
+
+* Designed for **Espanso unmanaged mode**
+* Requires `espanso` binary available in system `PATH`
+* Assumes YAML structure contains `matches` key
 
 ---
 <p align="center">
   <img src="./screenshots/main-ui.png" width="800">
 </p>
-
-## 📦 Features
-
-* GUI-based YAML editor for Espanso
-* Live filtering/search
-* Start/Stop/Restart Espanso from UI
-* YAML validation for `vars`
-* Built-in log panel
 
 ---
 
@@ -80,28 +202,6 @@ matches:
         type: date
 ```
 
----
-
-## 🛠 Controls
-
-| Button  | Function        |
-| ------- | --------------- |
-| Start   | Start espanso   |
-| Stop    | Stop espanso    |
-| Restart | Restart espanso |
-| Refresh | Update status   |
-
----
-
-## ⌨️ Shortcuts
-
-| Shortcut | Action          |
-| -------- | --------------- |
-| Ctrl + N | Add entry       |
-| Ctrl + S | Save            |
-| Delete   | Delete selected |
-
----
 
 ## ⚠️ Notes
 
@@ -110,13 +210,3 @@ matches:
 - Requires the espanso binary to be available in PATH
 - YAML errors in `vars` are validated (see handling in [main.py](./main.py))
 ---
-
-## 🐞 Known Issues
-
-* No schema validation for full espanso config
-* Assumes `matches` key exists
-
----
-
-
-
