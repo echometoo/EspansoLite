@@ -6,6 +6,11 @@ It provides a simple and efficient way to edit YAML-based text expansion rules, 
 
 Built with **Python + Tkinter**, it requires no additional GUI frameworks and runs cross-platform.
 
+
+<p align="center">
+  <img src="./screenshots/main-ui.png" width="800">
+</p>
+
 ---
 
 ## 🚀 Key Features
@@ -138,11 +143,6 @@ Built with **Python + Tkinter**, it requires no additional GUI frameworks and ru
 * Designed for **Espanso unmanaged mode**
 * Requires `espanso` binary available in system `PATH`
 * Assumes YAML structure contains `matches` key
-
----
-<p align="center">
-  <img src="./screenshots/main-ui.png" width="800">
-</p>
 
 ---
 
