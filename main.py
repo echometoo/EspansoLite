@@ -20,13 +20,29 @@ class EspansoLite:
         self.matches = []
         self.filtered = []
 
+        self.setup_style()
         self.build_ui()
         self.bind_shortcuts()
         self.load()
-        self.detect_status()  # hanya sekali saat startup
+        self.detect_status()
+
+    # ---------- STYLE ----------
+    def setup_style(self):
+        style = ttk.Style()
+        style.theme_use("default")
+
+        style.configure("Treeview",
+                        background="white",
+                        foreground="black",
+                        rowheight=24,
+                        fieldbackground="white")
+
+        style.configure("Treeview.Heading",
+                        background="#e0e0e0")
 
     # ---------- UI ----------
     def build_ui(self):
+        # ===== TOP =====
         top = tk.Frame(self.root)
         top.pack(fill="x")
 
@@ -34,7 +50,7 @@ class EspansoLite:
         tk.Button(top, text="Browse", command=self.browse).pack(side="left")
         tk.Button(top, text="Reload", command=self.load).pack(side="left")
 
-        # ===== ESPANSO CONTROL =====
+        # ===== CONTROL =====
         ctrl = tk.Frame(self.root)
         ctrl.pack(fill="x", pady=5)
 
@@ -43,22 +59,22 @@ class EspansoLite:
         tk.Button(ctrl, text="Restart", command=self.restart_espanso).pack(side="left")
         tk.Button(ctrl, text="Refresh", command=self.detect_status).pack(side="left")
 
-        self.status_label = tk.Label(ctrl, textvariable=self.status_var, width=25)
+        self.status_label = tk.Label(ctrl, textvariable=self.status_var, width=40)
         self.status_label.pack(side="right")
 
-        # Search
-        tk.Entry(self.root, textvariable=self.search_var).pack(fill="x")
+        # Divider
+        tk.Frame(self.root, height=2, bg="gray").pack(fill="x", pady=5)
+
+        # ===== SEARCH =====
+        search_frame = tk.Frame(self.root)
+        search_frame.pack(fill="x")
+
+        tk.Label(search_frame, text="Search / Filter:").pack(anchor="w")
+        tk.Entry(search_frame, textvariable=self.search_var).pack(fill="x")
+
         self.search_var.trace_add("write", lambda *_: self.apply_filter())
 
-        # Table
-        self.tree = ttk.Treeview(self.root, columns=("trigger", "replace"), show="headings")
-        self.tree.heading("trigger", text="Trigger")
-        self.tree.heading("replace", text="Replace")
-        self.tree.pack(fill="both", expand=True)
-
-        self.tree.bind("<<TreeviewSelect>>", self.select)
-
-        # Form
+        # ===== FORM =====
         form = tk.Frame(self.root)
         form.pack(fill="x")
 
@@ -76,7 +92,7 @@ class EspansoLite:
 
         form.columnconfigure(1, weight=1)
 
-        # Buttons
+        # ===== BUTTONS =====
         btns = tk.Frame(self.root)
         btns.pack(fill="x")
 
@@ -85,14 +101,69 @@ class EspansoLite:
         tk.Button(btns, text="Delete", command=self.delete).pack(side="left")
         tk.Button(btns, text="Save", command=self.save).pack(side="right")
 
-        # ===== LOG PANEL =====
-        log_frame = tk.Frame(self.root)
-        log_frame.pack(fill="both", expand=True)
+        # ===== MAIN CONTENT =====
+        main_frame = tk.Frame(self.root)
+        main_frame.pack(fill="both", expand=True)
+
+        main_frame.rowconfigure(0, weight=1)
+        main_frame.rowconfigure(1, weight=0)
+        main_frame.columnconfigure(0, weight=1)
+
+        # ===== TABLE =====
+        table_frame = tk.Frame(main_frame)
+        table_frame.grid(row=0, column=0, sticky="nsew")
+
+        table_frame.rowconfigure(0, weight=1)
+        table_frame.columnconfigure(0, weight=1)
+
+        self.tree = ttk.Treeview(
+            table_frame,
+            columns=("trigger", "replace"),
+            show="headings"
+        )
+
+        v_scroll = tk.Scrollbar(table_frame, orient="vertical", command=self.tree.yview)
+        h_scroll = tk.Scrollbar(table_frame, orient="horizontal", command=self.tree.xview)
+
+        self.tree.configure(yscrollcommand=v_scroll.set, xscrollcommand=h_scroll.set)
+
+        self.tree.grid(row=0, column=0, sticky="nsew")
+        v_scroll.grid(row=0, column=1, sticky="ns")
+        h_scroll.grid(row=1, column=0, sticky="ew")
+
+        self.tree.heading("trigger", text="Trigger")
+        self.tree.heading("replace", text="Replace")
+
+        self.tree.column("trigger", width=300, anchor="w", stretch=False)
+        self.tree.column("replace", width=1000, anchor="w", stretch=False)
+
+        self.tree.tag_configure("even", background="#ffffff")
+        self.tree.tag_configure("odd", background="#f2f2f2")
+
+        self.tree.bind("<<TreeviewSelect>>", self.select)
+        self.tree.bind("<Double-1>", self.select)
+
+        # ===== LOG =====
+        log_frame = tk.Frame(main_frame)
+        log_frame.grid(row=1, column=0, sticky="ew")
 
         tk.Label(log_frame, text="Log").pack(anchor="w")
 
-        self.log = tk.Text(log_frame, height=8)
-        self.log.pack(fill="both", expand=True)
+        log_container = tk.Frame(log_frame, height=150)
+        log_container.pack(fill="x")
+        log_container.pack_propagate(False)
+
+        # Inner frame to hold text + scrollbar
+        log_inner = tk.Frame(log_container)
+        log_inner.pack(fill="both", expand=True)
+
+        self.log = tk.Text(log_inner)
+        log_scroll = tk.Scrollbar(log_inner, orient="vertical", command=self.log.yview)
+
+        self.log.configure(yscrollcommand=log_scroll.set)
+
+        self.log.pack(side="left", fill="both", expand=True)
+        log_scroll.pack(side="right", fill="y")
 
         tk.Button(log_frame, text="Clear Log", command=self.clear_log).pack(anchor="e")
 
@@ -125,7 +196,8 @@ class EspansoLite:
         return "stopped"
 
     def update_status_label(self, status):
-        self.status_var.set(f"Status: {status}")
+        count = len(self.filtered)
+        self.status_var.set(f"Status: {status} | {count} items")
         color = "green" if status == "running" else "red"
         self.status_label.config(fg=color)
 
@@ -194,8 +266,10 @@ class EspansoLite:
     def refresh(self):
         self.tree.delete(*self.tree.get_children())
         for i, m in enumerate(self.filtered):
+            tag = "even" if i % 2 == 0 else "odd"
             self.tree.insert("", "end", iid=i,
-                             values=(m.get("trigger", ""), m.get("replace", "")))
+                             values=(m.get("trigger", ""), m.get("replace", "")),
+                             tags=(tag,))
 
     def select(self, event):
         sel = self.tree.selection()
@@ -230,27 +304,23 @@ class EspansoLite:
         return entry
 
     def add(self):
-        try:
-            self.matches.append(self.build_entry())
-            self.apply_filter()
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+        self.matches.append(self.build_entry())
+        self.apply_filter()
 
     def update(self):
         sel = self.tree.selection()
         if not sel:
             return
-        try:
-            original = self.filtered[int(sel[0])]
-            idx = self.matches.index(original)
-            self.matches[idx] = self.build_entry()
-            self.apply_filter()
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+        original = self.filtered[int(sel[0])]
+        idx = self.matches.index(original)
+        self.matches[idx] = self.build_entry()
+        self.apply_filter()
 
     def delete(self):
         sel = self.tree.selection()
         if not sel:
+            return
+        if not messagebox.askyesno("Confirm", "Delete selected entry?"):
             return
         original = self.filtered[int(sel[0])]
         self.matches.remove(original)
