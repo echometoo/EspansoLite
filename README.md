@@ -8,7 +8,7 @@ Built with **Python + Tkinter**, it requires no additional GUI frameworks and ru
 
 
 <p align="center">
-  <img src="./screenshots/main-ui.png" width="800">
+  <img src="./main-ui.png" width="800">
 </p>
 
 ---
